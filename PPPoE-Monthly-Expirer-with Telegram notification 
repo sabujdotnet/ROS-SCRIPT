@@ -1,0 +1,33 @@
+:local targetComment "30day"
+:local botToken "your tok3n"
+:local chatId "-chat id3"
+
+:foreach activeID in=[/ppp active find] do={
+    :local userName [/ppp active get $activeID name]
+    :local userUptime [/ppp active get $activeID uptime]
+    :local secretID [/ppp secret find where name=$userName]
+    
+    :if ([:len $secretID] > 0) do={
+        :local secretComment [/ppp secret get $secretID comment]
+        
+        :if ($secretComment ~ $targetComment) do={
+            :if ($userUptime >= 30d) do={
+                :log warning ("[30-Day Expirer] Disconnecting and disabling expired user: " . $userName)
+                
+                # 1. Disconnect active PPP session
+                /ppp active remove $activeID
+                
+                # 2. Disable user secret
+                /ppp secret set $secretID disabled=yes
+                
+                # 3. Send Telegram Alert
+                :local msgText ("User%20" . $userName . "%20has%20been%20disabled%20(30-Day%20Limit%20Reached).")
+                :local url ("https://api.telegram.org/bot" . $botToken . "/sendMessage?chat_id=" . $chatId . "&text=" . $msgText)
+                
+                /tool fetch url=$url keep-result=no
+                :delay 1s
+            }
+        }
+    }
+}
+#sabujdotnet
