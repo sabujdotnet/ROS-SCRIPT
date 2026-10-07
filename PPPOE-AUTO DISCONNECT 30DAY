@@ -20,4 +20,8 @@ add dont-require-permissions=no name=PPPoE-Monthly-Expirer owner=admin policy=\
     \n    }\r\
     \n}\r\
     \n"
+
 #ROS7.X.X
+#How to Use It
+#Tag Secrets: For any PPPoE user you want tracked by this script, add 30day anywhere in their #Comment field in /ppp secret (e.g., 30day - Client Name).
+#Execution: Every night at 3:00 AM, the scheduler checks active connections. If a tagged user #reaches 30d continuous uptime, the router drops their active session and sets disabled=yes on #their secret.
