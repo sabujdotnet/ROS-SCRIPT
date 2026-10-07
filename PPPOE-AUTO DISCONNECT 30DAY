@@ -1,0 +1,23 @@
+/system script
+add dont-require-permissions=no name=PPPoE-Monthly-Expirer owner=admin policy=\
+    ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon source=":\
+    local targetComment \"30day\";\r\
+    \n\r\
+    \n:foreach activeSession in=[/ppp active find] do={\r\
+    \n    :local userName [/ppp active get \$activeSession name];\r\
+    \n    :local uptime [/ppp active get \$activeSession uptime];\r\
+    \n    :local secretID [/ppp secret find where name=\$userName comment~\
+    \$targetComment];\r\
+    \n    \r\
+    \n    :if ([:len \$secretID] > 0) do={\r\
+    \n        # Check if active connection reached or exceeded 30 days\r\
+    \n        :if (\$uptime >= 30d) do={\r\
+    \n            :log warning (\"[30-Day Expirer] User \" . \$userName . \"\
+     reached 30 days limit. Disconnecting and disabling...\");\r\
+    \n            /ppp active remove \$activeSession;\r\
+    \n            /ppp secret set \$secretID disabled=yes;\r\
+    \n        }\r\
+    \n    }\r\
+    \n}\r\
+    \n"
+#ROS7.X.X
