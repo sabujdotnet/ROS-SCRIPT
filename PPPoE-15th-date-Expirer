@@ -1,0 +1,20 @@
+:local targetComment "30day"
+
+:foreach secretID in=[/ppp secret find where comment~$targetComment] do={
+    :local userName [/ppp secret get $secretID name]
+    
+    # Check if user is currently active and drop their live connection
+    :local activeID [/ppp active find where name=$userName]
+    :if ([:len $activeID] > 0) do={
+        :log warning ("[Monthly Expirer] Disconnecting live session for user: " . $userName)
+        /ppp active remove $activeID
+    }
+    
+    # Disable the secret account so they cannot reconnect
+    :log warning ("[Monthly Expirer] Disabling secret account for user: " . $userName)
+    /ppp secret set $secretID disabled=yes
+}
+
+#TESTED ON ROS 6.49.19
+#JUST CREATE A SCHEDULERS
+#sample  /system scheduler add name="Run-15th-Expirer" start-date=oct/15/2026 start-time=00:01:00 interval=30d on-event="PPPoE-15th-Expirer"
